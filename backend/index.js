@@ -12,6 +12,9 @@ const { body, validationResult } = require("express-validator");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for rate limiting behind reverse proxy
+app.set("trust proxy", 1);
+
 // Email transporter configuration
 const transporter = nodemailer.createTransport({
   host: "smtp.timeweb.ru",

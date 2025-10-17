@@ -75,7 +75,7 @@ app.get("/health", (req, res) => {
 app.get("/api/status", (req, res) => {
   res.json({
     message: "API is working",
-    version: "1.0.0",
+    version: "1.1.0",
   });
 });
 
@@ -124,30 +124,6 @@ app.post(
     // Honeypot check - if filled, it's likely spam
     if (honeypot && honeypot.trim() !== "") {
       console.log(`Spam detected - honeypot field filled from ${email}`);
-      return res.status(400).json({
-        success: false,
-        error: "Сообщение отклонено",
-      });
-    }
-
-    // Additional spam detection
-    const spamKeywords = [
-      "viagra",
-      "casino",
-      "loan",
-      "bitcoin",
-      "crypto",
-      "spam",
-    ];
-    const messageText = message.toLowerCase();
-    const isSpam = spamKeywords.some((keyword) =>
-      messageText.includes(keyword)
-    );
-
-    if (isSpam) {
-      console.log(
-        `Spam detected from ${email}: ${message.substring(0, 50)}...`
-      );
       return res.status(400).json({
         success: false,
         error: "Сообщение отклонено",

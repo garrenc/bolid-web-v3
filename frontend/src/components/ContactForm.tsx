@@ -96,7 +96,7 @@ const ContactForm: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/send`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/send`,
         {
           method: "POST",
           headers: {

@@ -1,0 +1,24 @@
+{
+  "name": "Радио Болид",
+  "short_name": "Болид",
+  "description": "Лучшая музыка 24/7. Слушайте нас онлайн и наслаждайтесь лучшими хитами!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#b01c1c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["entertainment", "music"],
+  "lang": "ru"
+}

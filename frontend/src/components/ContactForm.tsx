@@ -13,6 +13,7 @@ interface FormData {
   email: string;
   subject: string;
   message: string;
+  honeypot?: string; // Hidden field for spam protection
 }
 
 interface FormErrors {
@@ -27,6 +28,7 @@ const ContactForm: React.FC = () => {
     email: "",
     subject: "",
     message: "",
+    honeypot: "", // Hidden field for spam protection
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -81,19 +83,28 @@ const ContactForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Honeypot check - if filled, it's likely spam
+    if (formData.honeypot) {
+      console.log("Spam detected - honeypot field filled");
+      return;
+    }
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setSubmitStatus("idle");
 
     try {
-      const response = await fetch("https://bolidfm.ru/api/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/send`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (response.ok) {
         setSubmitStatus("success");
@@ -102,8 +113,11 @@ const ContactForm: React.FC = () => {
           email: "",
           subject: "",
           message: "",
+          honeypot: "",
         });
       } else {
+        const errorData = await response.json();
+        console.error("Server error:", errorData);
         setSubmitStatus("error");
       }
     } catch (error) {
@@ -175,6 +189,20 @@ const ContactForm: React.FC = () => {
             <option value="Отзыв">Отзыв</option>
             <option value="Другое">Другое</option>
           </select>
+        </div>
+
+        {/* Honeypot field - hidden from users */}
+        <div style={{ display: "none" }}>
+          <label htmlFor="honeypot">Leave this field empty</label>
+          <input
+            type="text"
+            id="honeypot"
+            name="honeypot"
+            value={formData.honeypot}
+            onChange={handleChange}
+            tabIndex={-1}
+            autoComplete="off"
+          />
         </div>
 
         <div className="form-group">

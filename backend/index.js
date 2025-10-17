@@ -6,6 +6,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const nodemailer = require("nodemailer");
+const rateLimit = require("express-rate-limit");
+const { body, validationResult } = require("express-validator");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,12 +23,32 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Rate limiting for contact form
+const contactFormLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 3, // Limit each IP to 3 requests per windowMs
+  message: {
+    success: false,
+    error: "Слишком много запросов. Попробуйте позже.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// General rate limiting
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+});
+
 // Middleware
 app.use(helmet()); // Security headers
 app.use(cors()); // Enable CORS
 app.use(morgan("combined")); // Logging
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.json({ limit: "10mb" })); // Parse JSON bodies with size limit
+app.use(express.urlencoded({ extended: true, limit: "10mb" })); // Parse URL-encoded bodies
+app.use(generalLimiter); // Apply general rate limiting
 
 // Basic route
 app.get("/", (req, res) => {
@@ -54,36 +76,105 @@ app.get("/api/status", (req, res) => {
   });
 });
 
-// Email sending route
-app.post("/send", async (req, res) => {
-  const { name, email, subject, message } = req.body;
+// Input validation rules
+const contactFormValidation = [
+  body("name")
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage("Имя должно быть от 2 до 50 символов")
+    .matches(/^[а-яА-ЯёЁa-zA-Z\s]+$/)
+    .withMessage("Имя может содержать только буквы"),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Введите корректный email адрес"),
+  body("subject")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Тема не должна превышать 100 символов"),
+  body("message")
+    .trim()
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Сообщение должно быть от 10 до 2000 символов")
+    .escape(), // Sanitize HTML
+];
 
-  // Validate required fields
-  if (!name || !email || !message) {
-    return res.status(400).json({
-      success: false,
-      error: "Все поля обязательны для заполнения",
-    });
+// Email sending route with spam protection
+app.post(
+  "/send",
+  contactFormLimiter,
+  contactFormValidation,
+  async (req, res) => {
+    // Check validation results
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: "Некорректные данные",
+        details: errors.array().map((err) => err.msg),
+      });
+    }
+
+    const { name, email, subject, message, honeypot } = req.body;
+
+    // Honeypot check - if filled, it's likely spam
+    if (honeypot && honeypot.trim() !== "") {
+      console.log(`Spam detected - honeypot field filled from ${email}`);
+      return res.status(400).json({
+        success: false,
+        error: "Сообщение отклонено",
+      });
+    }
+
+    // Additional spam detection
+    const spamKeywords = [
+      "viagra",
+      "casino",
+      "loan",
+      "bitcoin",
+      "crypto",
+      "spam",
+    ];
+    const messageText = message.toLowerCase();
+    const isSpam = spamKeywords.some((keyword) =>
+      messageText.includes(keyword)
+    );
+
+    if (isSpam) {
+      console.log(
+        `Spam detected from ${email}: ${message.substring(0, 50)}...`
+      );
+      return res.status(400).json({
+        success: false,
+        error: "Сообщение отклонено",
+      });
+    }
+
+    try {
+      await transporter.sendMail({
+        from: `"${name}" <${process.env.SMTP_USER}>`,
+        to: "office@bolidfm.ru",
+        replyTo: email,
+        subject: subject
+          ? `Сообщение с сайта: ${subject}`
+          : "Сообщение с сайта",
+        text: `Имя: ${name}\nEmail: ${email}\nТема: ${subject}\n\nСообщение:\n${message}`,
+      });
+
+      // Log successful email
+      console.log(`Email sent successfully from ${email} (${name})`);
+
+      res.status(200).json({ success: true });
+    } catch (err) {
+      console.error("Ошибка отправки:", err);
+      res.status(500).json({
+        success: false,
+        error: "Не удалось отправить письмо",
+      });
+    }
   }
-
-  try {
-    await transporter.sendMail({
-      from: `"${name}" <${process.env.SMTP_USER}>`,
-      to: "office@bolidfm.ru",
-      replyTo: email,
-      subject: subject ? `Сообщение с сайта: ${subject}` : "Сообщение с сайта",
-      text: `Имя: ${name}\nEmail: ${email}\nТема: ${subject}\n\nСообщение:\n${message}`,
-    });
-
-    res.status(200).json({ success: true });
-  } catch (err) {
-    console.error("Ошибка отправки:", err);
-    res.status(500).json({
-      success: false,
-      error: "Не удалось отправить письмо",
-    });
-  }
-});
+);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

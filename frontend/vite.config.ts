@@ -30,7 +30,7 @@ export default defineConfig({
   // Enable compression
   server: {
     host: true,
-    port: 3000,
+    port: 5173,
   },
   // Optimize assets
   assetsInclude: ["**/*.png", "**/*.jpg", "**/*.jpeg", "**/*.gif", "**/*.svg"],

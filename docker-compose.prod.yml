@@ -10,8 +10,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
     volumes:
-      - ./backend/config.env:/app/config.env:ro
+      - ./backend/.env:/app/.env:ro
     restart: unless-stopped
     networks:
       - bolid-network

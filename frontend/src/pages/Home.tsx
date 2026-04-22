@@ -8,6 +8,7 @@ import {
   Play,
   Pause,
   Send,
+  Users,
 } from "lucide-react";
 import ContactForm from "../components/ContactForm";
 import { useAudio } from "../contexts/AudioContext";
@@ -157,11 +158,11 @@ const Home: React.FC = () => {
             </div>
             <div className="contact-info-card">
               <div className="contact-icon">
-                <Send size={24} />
+                <Users size={24} />
               </div>
               <div className="contact-details">
                 <h3>Утро Болид</h3>
-                <a href="https://t.me/utrobolid" className="contact-link">
+                <a href="https://max.ru/join/-IOrPv-qjwQpJa4HFjApHZQFkMeh4QqJU7wyq1VSs_c" className="contact-link">
                   @utrobolid
                 </a>
               </div>

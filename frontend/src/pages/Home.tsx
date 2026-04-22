@@ -7,7 +7,6 @@ import {
   Smartphone,
   Play,
   Pause,
-  Send,
   Users,
 } from "lucide-react";
 import ContactForm from "../components/ContactForm";

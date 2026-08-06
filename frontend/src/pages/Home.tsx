@@ -104,34 +104,36 @@ const Home: React.FC = () => {
       <section className="contact-info-section">
         <div className="container">
           <div className="contact-info-grid">
-            <div className="contact-info-card">
+            <a
+              href="https://advradio.ru"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-info-card contact-info-card-clickable"
+            >
               <div className="contact-icon">
                 <Globe size={24} />
               </div>
               <div className="contact-details">
                 <h3>Реклама на радио</h3>
-                <a
-                  href="https://advradio.ru"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="contact-link"
-                >
-                  advradio.ru
-                </a>
+                <span className="contact-link">advradio.ru</span>
               </div>
-            </div>{" "}
-            <div className="contact-info-card">
+            </a>{" "}
+            <a
+              href="tel:+73422334149"
+              className="contact-info-card contact-info-card-clickable"
+            >
               <div className="contact-icon">
                 <Phone size={24} />
               </div>
               <div className="contact-details">
                 <h3>Офис</h3>
-                <a href="tel:+73422334149" className="contact-link">
-                  +7 342 233 41 49
-                </a>
+                <span className="contact-link">+7 342 233 41 49</span>
               </div>
-            </div>{" "}
-            <div className="contact-info-card">
+            </a>{" "}
+            <a
+              href="#contact-map"
+              className="contact-info-card contact-info-card-clickable"
+            >
               <div className="contact-icon">
                 <MapPin size={24} />
               </div>
@@ -143,29 +145,33 @@ const Home: React.FC = () => {
                   ул. Куйбышева 37-602
                 </p>
               </div>
-            </div>{" "}
-            <div className="contact-info-card">
+            </a>{" "}
+            <a
+              href="tel:+73422393399"
+              className="contact-info-card contact-info-card-clickable"
+            >
               <div className="contact-icon">
                 <Radio size={24} />
               </div>
               <div className="contact-details">
                 <h3>Телефон эфира</h3>
-                <a href="tel:+73422393399" className="contact-link">
-                  +7 342 239 33 99
-                </a>
+                <span className="contact-link">+7 342 239 33 99</span>
               </div>
-            </div>
-            <div className="contact-info-card">
+            </a>
+            <a
+              href="https://max.ru/join/-IOrPv-qjwQpJa4HFjApHZQFkMeh4QqJU7wyq1VSs_c"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-info-card contact-info-card-clickable"
+            >
               <div className="contact-icon">
                 <Users size={24} />
               </div>
               <div className="contact-details">
                 <h3>Утро Болид</h3>
-                <a href="https://max.ru/join/-IOrPv-qjwQpJa4HFjApHZQFkMeh4QqJU7wyq1VSs_c" className="contact-link">
-                  @utrobolid
-                </a>
+                <span className="contact-link">@utrobolid</span>
               </div>
-            </div>
+            </a>
             <div className="contact-info-card">
               <div className="contact-icon">
                 <Smartphone size={24} />
@@ -233,7 +239,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Map - Full Width */}
-      <section className="contact-map-section">
+      <section className="contact-map-section" id="contact-map">
         <div className="container">
           <div className="contact-map-full-width">
             <div className="contact-map-header">

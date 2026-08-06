@@ -856,6 +856,20 @@ body {
   margin-bottom: var(--spacing-sm);
 }
 
+.footer-connect-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.footer-connect-button:hover {
+  color: var(--primary-red);
+}
+
 .footer-section a {
   color: var(--gray-300);
   text-decoration: none;
@@ -973,6 +987,17 @@ body {
 .contact-info-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+}
+
+.contact-info-card-clickable {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.contact-info-card-clickable:hover {
+  text-decoration: none;
 }
 
 .contact-icon {

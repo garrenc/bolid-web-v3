@@ -11,6 +11,92 @@ const { body, validationResult } = require("express-validator");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const STREAM_URL = "https://icecast-bulteam.cdnvideo.ru/bolid128";
+
+let currentTrackCache = {
+  updatedAt: 0,
+  data: {
+    artist: "Радио Болид",
+    title: "Прямая трансляция",
+    raw: "Прямая трансляция",
+  },
+};
+
+const splitTrackTitle = (rawTitle) => {
+  const raw = rawTitle && rawTitle.trim();
+
+  if (!raw) {
+    return {
+      artist: "Радио Болид",
+      title: "Прямая трансляция",
+      raw: "Прямая трансляция",
+    };
+  }
+
+  const separatorIndex = raw.indexOf(" - ");
+
+  if (separatorIndex === -1) {
+    return {
+      artist: "Радио Болид",
+      title: raw,
+      raw,
+    };
+  }
+
+  return {
+    artist: raw.slice(0, separatorIndex).trim() || "Радио Болид",
+    title: raw.slice(separatorIndex + 3).trim() || "Прямая трансляция",
+    raw,
+  };
+};
+
+const readCurrentTrackFromStream = async () => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(STREAM_URL, {
+      headers: { "Icy-MetaData": "1" },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Stream returned ${response.status}`);
+    }
+
+    const metaint = Number(response.headers.get("icy-metaint"));
+
+    if (!metaint || !response.body) {
+      throw new Error("Stream did not return ICY metadata interval");
+    }
+
+    const reader = response.body.getReader();
+    const chunks = [];
+    let totalLength = 0;
+    const requiredLength = metaint + 4081;
+
+    while (totalLength < requiredLength) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      chunks.push(Buffer.from(value));
+      totalLength += value.length;
+    }
+
+    await reader.cancel();
+
+    const buffer = Buffer.concat(chunks, totalLength);
+    const metadataLength = buffer[metaint] * 16;
+    const metadata = buffer
+      .slice(metaint + 1, metaint + 1 + metadataLength)
+      .toString("utf8")
+      .replace(/\0/g, "");
+    const match = metadata.match(/StreamTitle='([^']*)';/);
+
+    return splitTrackTitle(match?.[1]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
 
 // Trust proxy for rate limiting behind reverse proxy
 app.set("trust proxy", 1);
@@ -77,6 +163,39 @@ app.get("/api/status", (req, res) => {
     message: "API is working",
     version: "1.1.0",
   });
+});
+
+app.get("/api/current-track", async (req, res) => {
+  const cacheTtlMs = 15000;
+
+  if (Date.now() - currentTrackCache.updatedAt < cacheTtlMs) {
+    return res.json({
+      success: true,
+      source: "cache",
+      ...currentTrackCache.data,
+    });
+  }
+
+  try {
+    const data = await readCurrentTrackFromStream();
+    currentTrackCache = {
+      updatedAt: Date.now(),
+      data,
+    };
+
+    res.json({
+      success: true,
+      source: "icy",
+      ...data,
+    });
+  } catch (err) {
+    console.error("Current track error:", err);
+    res.status(502).json({
+      success: false,
+      error: err.message,
+      ...currentTrackCache.data,
+    });
+  }
 });
 
 // Input validation rules

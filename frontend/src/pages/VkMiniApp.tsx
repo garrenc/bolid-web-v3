@@ -2,14 +2,12 @@ import React, { useEffect } from "react";
 import { MessageCircle, Pause, Play } from "lucide-react";
 import bolidLogo from "../assets/images/bolid-logo.jpg";
 import { useAudio } from "../contexts/AudioContext";
-import { useCurrentTrack } from "../hooks/useCurrentTrack";
 
 const STREAM_URL = "https://icecast-bulteam.cdnvideo.ru/bolid128";
 
 const VkMiniApp: React.FC = () => {
   const { isPlaying, isLoading, audioRef, togglePlayPause, setIsPlaying } =
     useAudio();
-  const currentTrack = useCurrentTrack();
 
   useEffect(() => {
     if (audioRef.current) {
@@ -57,17 +55,6 @@ const VkMiniApp: React.FC = () => {
               )}
               <span>{isPlaying ? "Пауза" : "Слушать"}</span>
             </button>
-
-            <div className="vk-track">
-              <div className="vk-track-label">Сейчас играет</div>
-              <div className="vk-track-title">{currentTrack.title}</div>
-              <div className="vk-track-artist">{currentTrack.artist}</div>
-              {currentTrack.error && (
-                <div className="vk-track-error">
-                  Не удалось обновить трек: {currentTrack.error}
-                </div>
-              )}
-            </div>
           </div>
         </section>
 

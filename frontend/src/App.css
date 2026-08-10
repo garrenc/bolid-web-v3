@@ -2182,44 +2182,6 @@ body {
   cursor: wait;
 }
 
-.vk-track {
-  width: 100%;
-  padding: clamp(18px, 4vw, 28px);
-  background: var(--gray-50);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  text-align: left;
-}
-
-.vk-track-label {
-  color: var(--gray-500);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: var(--spacing-xs);
-}
-
-.vk-track-title {
-  color: var(--gray-900);
-  font-size: clamp(1.35rem, 5vw, 2.25rem);
-  font-weight: 700;
-  line-height: 1.15;
-  overflow-wrap: anywhere;
-}
-
-.vk-track-artist {
-  color: var(--gray-600);
-  font-size: 1rem;
-  margin-top: var(--spacing-xs);
-  overflow-wrap: anywhere;
-}
-
-.vk-track-error {
-  color: var(--primary-red-dark);
-  font-size: 0.85rem;
-  margin-top: var(--spacing-sm);
-}
-
 .vk-message-button {
   display: flex;
   align-items: center;
